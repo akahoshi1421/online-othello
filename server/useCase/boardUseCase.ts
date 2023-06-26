@@ -42,9 +42,9 @@ export const boardUseCase = {
 
     let youCanTurn = false;
 
-    if (canTurnAble === color && x !== -1) {
+    if (canTurnAble === color) {
       youCanTurn = true;
-      turnFunc(x, y, color, false);
+      if (x !== -1) turnFunc(x, y, color, false);
     }
 
     return { board, nowTurn: canTurnAble, youCanTurn };

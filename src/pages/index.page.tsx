@@ -12,6 +12,7 @@ const Home = () => {
   const [user] = useAtom(userAtom);
   const [board, setBoard] = useState<number[][]>();
   const [turnColor, setTurnColor] = useState(1);
+  const [isMyturn, setIsMyturn] = useState(false);
 
   // const { win, turnColor } = useGame();
   const win = { white: -1, black: -1 };
@@ -33,11 +34,25 @@ const Home = () => {
     await fetchBoard();
   };
 
+  const checkMyTurn = async () => {
+    const res = await apiClient.board
+      .$post({
+        body: { x: -1, y: -1 },
+      })
+      .catch(returnNull);
+
+    if (res !== null) {
+      setIsMyturn(res.youCanTurn);
+    }
+  };
+
   useEffect(() => {
     const cancelId = setInterval(fetchBoard, 500);
+    const cancelId2 = setInterval(checkMyTurn, 500);
 
     return () => {
       clearInterval(cancelId);
+      clearInterval(cancelId2);
     };
   }, []);
 
@@ -63,7 +78,11 @@ const Home = () => {
             </ul>
           </>
         )}
-        {win.black === -1 && <p>{turnColor === 1 ? '黒' : '白'}のターン</p>}
+        {win.black === -1 && (
+          <p>
+            {isMyturn ? 'あなた' : '相手'}({turnColor === 1 ? '黒' : '白'})のターン
+          </p>
+        )}
 
         <div className={styles.board}>
           {board.map((row, y) =>
