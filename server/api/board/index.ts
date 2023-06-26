@@ -1,9 +1,11 @@
+import type { ReturnItems } from '$/useCase/boardUseCase';
+
 export type Methods = {
   get: {
-    resBody: number[][];
+    resBody: ReturnItems;
   };
   post: {
     reqBody: { x: number; y: number };
-    resBody: number[][];
+    resBody: ReturnItems;
   };
 };

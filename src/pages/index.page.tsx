@@ -11,16 +11,17 @@ import styles from './index.module.css';
 const Home = () => {
   const [user] = useAtom(userAtom);
   const [board, setBoard] = useState<number[][]>();
+  const [turnColor, setTurnColor] = useState(1);
 
   // const { win, turnColor } = useGame();
-  const win = { white: 0, black: 0 };
-  const turnColor = 1;
+  const win = { white: -1, black: -1 };
 
   const fetchBoard = async () => {
     const res = await apiClient.board.$get().catch(returnNull);
 
     if (res !== null) {
-      setBoard(res);
+      setBoard(res.board);
+      setTurnColor(res.nowTurn);
     }
   };
 
