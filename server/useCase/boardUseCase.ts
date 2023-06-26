@@ -10,6 +10,10 @@ export type ReturnItems = {
 
   /** 送ってきたユーザはそもそもオセロを返せるか */
   youCanTurn: boolean;
+
+  win: { black: number; white: number };
+
+  msg: string;
 };
 
 let board: number[][] = [
@@ -24,6 +28,8 @@ let board: number[][] = [
 ];
 
 let canTurnAble = 1;
+const win = { black: -1, white: -1 };
+let isPassFront = false;
 
 export const boardUseCase = {
   getBoard: (): ReturnItems => {
@@ -34,8 +40,8 @@ export const boardUseCase = {
         return turnFunc(j, i, canTurnAble, true) ? 3 : x === 3 ? 0 : x;
       });
     });
-
-    return { board: newBoard, nowTurn: canTurnAble, youCanTurn: false };
+    winCheck();
+    return { board: newBoard, nowTurn: canTurnAble, youCanTurn: false, win, msg: '' };
   },
   clickBoard: (x: number, y: number, userId: UserId): ReturnItems => {
     const color: number = colorUseCase.createColor(userId);
@@ -46,9 +52,69 @@ export const boardUseCase = {
       youCanTurn = true;
       if (x !== -1) turnFunc(x, y, color, false);
     }
+    const msg: string = passCheck(canTurnAble);
 
-    return { board, nowTurn: canTurnAble, youCanTurn };
+    return { board, nowTurn: canTurnAble, youCanTurn, win, msg };
   },
+};
+
+const winCheck = () => {
+  if (win.black === -1) {
+    let isZero = false;
+
+    let black = 0;
+    let white = 0;
+
+    for (const y of board) {
+      for (const x of y) {
+        if (x === 0 || x === 3) {
+          isZero = true;
+          break;
+        }
+
+        if (x === 1) black++;
+        if (x === 2) white++;
+      }
+      if (isZero) break;
+    }
+
+    //勝敗判定
+    if (!isZero) {
+      win.black = black;
+      win.white = white;
+    }
+  }
+};
+
+const passCheck = (turnColor: number): string => {
+  if (win.black === -1) {
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        if (turnFunc(x, y, turnColor, true)) return '';
+      }
+    }
+    //2回パスなので勝敗を出す
+    if (isPassFront) {
+      let white = 0;
+      let black = 0;
+
+      for (const y of board) {
+        for (const x of y) {
+          if (x === 1) black++;
+          if (x === 2) white++;
+        }
+      }
+
+      win.black = black;
+      win.white = white;
+      return 'これ以上置く場所がないのでゲームを終了しました';
+    }
+
+    isPassFront = true;
+    canTurnAble = 3 - turnColor;
+    return 'パス';
+  }
+  return 'これ以上置く場所がないのでゲームを終了しました';
 };
 
 /**
@@ -109,12 +175,8 @@ const turnFunc = (x: number, y: number, turnColor: number, vertification: boolea
             isTurnAble = true;
 
             if (!vertification) {
-              for (const onePos of turnes) {
-                newBoard[onePos[0]][onePos[1]] = turnColor;
-              }
-            } else {
-              return isTurnAble;
-            }
+              for (const onePos of turnes) newBoard[onePos[0]][onePos[1]] = turnColor;
+            } else return isTurnAble;
 
             break;
           }
@@ -124,12 +186,7 @@ const turnFunc = (x: number, y: number, turnColor: number, vertification: boolea
         }
       }
 
-      // isSet && setTurnColor(3 - turnColor);
-      // isSet && setIsPassFront(false);
-
-      if (isSet) {
-        canTurnAble = 3 - turnColor;
-      }
+      if (isSet) canTurnAble = 3 - turnColor;
     }
   }
 

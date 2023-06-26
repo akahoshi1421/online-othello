@@ -13,9 +13,8 @@ const Home = () => {
   const [board, setBoard] = useState<number[][]>();
   const [turnColor, setTurnColor] = useState(1);
   const [isMyturn, setIsMyturn] = useState(false);
-
-  // const { win, turnColor } = useGame();
-  const win = { white: -1, black: -1 };
+  const [win, setWin] = useState({ white: -1, black: -1 });
+  const [msg, setMsg] = useState('');
 
   const fetchBoard = async () => {
     const res = await apiClient.board.$get().catch(returnNull);
@@ -23,6 +22,7 @@ const Home = () => {
     if (res !== null) {
       setBoard(res.board);
       setTurnColor(res.nowTurn);
+      setWin(res.win);
     }
   };
 
@@ -43,6 +43,7 @@ const Home = () => {
 
     if (res !== null) {
       setIsMyturn(res.youCanTurn);
+      setMsg(res.msg);
     }
   };
 
@@ -62,6 +63,7 @@ const Home = () => {
     <>
       <BasicHeader user={user} />
       <div className={styles.container}>
+        <p>{msg}</p>
         {win.black !== -1 && (
           <>
             <h2 className={styles.win}>
@@ -80,7 +82,8 @@ const Home = () => {
         )}
         {win.black === -1 && (
           <p>
-            {isMyturn ? 'あなた' : '相手'}({turnColor === 1 ? '黒' : '白'})のターン
+            <b style={{ color: 'red' }}>{isMyturn ? 'あなた' : '相手'}</b>(
+            {turnColor === 1 ? '黒' : '白'})のターン
           </p>
         )}
 
