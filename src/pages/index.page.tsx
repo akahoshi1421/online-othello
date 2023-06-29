@@ -1,65 +1,11 @@
-import { useAtom } from 'jotai';
-import { useEffect, useState } from 'react';
 import { Cell } from 'src/components/Cell';
 import { Loading } from 'src/components/Loading/Loading';
+import { useGame } from 'src/hooks/useGame';
 import { BasicHeader } from 'src/pages/@components/BasicHeader/BasicHeader';
-import { apiClient } from 'src/utils/apiClient';
-import { returnNull } from 'src/utils/returnNull';
-import { userAtom } from '../atoms/user';
 import styles from './index.module.scss';
 
 const Home = () => {
-  const [user] = useAtom(userAtom);
-  const [board, setBoard] = useState<number[][]>();
-  const [turnColor, setTurnColor] = useState(1);
-  const [isMyturn, setIsMyturn] = useState(false);
-  const [win, setWin] = useState({ white: -1, black: -1 });
-  const [msg, setMsg] = useState('');
-
-  const fetchBoard = async () => {
-    const res = await apiClient.board.$get().catch(returnNull);
-
-    if (res !== null) {
-      setBoard(res.board);
-      setTurnColor(res.nowTurn);
-      setWin(res.win);
-    }
-  };
-
-  const onClick = async (x: number, y: number) => {
-    await apiClient.board.$post({
-      body: { x, y },
-    });
-
-    await fetchBoard();
-  };
-
-  const checkMyTurn = async () => {
-    const res = await apiClient.board
-      .$post({
-        body: { x: -1, y: -1 },
-      })
-      .catch(returnNull);
-
-    if (res !== null) {
-      setIsMyturn(res.youCanTurn);
-      setMsg(res.msg);
-    }
-  };
-
-  const deleteBoard = async () => {
-    await apiClient.board.$delete();
-  };
-
-  useEffect(() => {
-    const cancelId = setInterval(fetchBoard, 500);
-    const cancelId2 = setInterval(checkMyTurn, 500);
-
-    return () => {
-      clearInterval(cancelId);
-      clearInterval(cancelId2);
-    };
-  }, []);
+  const { user, board, turnColor, isMyturn, win, msg, onClick, deleteBoard } = useGame();
 
   if (!user || !board) return <Loading visible />;
 
