@@ -1,20 +1,7 @@
 import type { UserId } from '$/commonTypesWithClient/branded';
 import { colorUseCase } from './colorUseCase';
-
-export type ReturnItems = {
-  /**  ボード */
-  board: number[][];
-
-  /**  現在オセロを返せるユーザ */
-  nowTurn: number;
-
-  /** 送ってきたユーザはそもそもオセロを返せるか */
-  youCanTurn: boolean;
-
-  win: { black: number; white: number };
-
-  msg: string;
-};
+import type { ReturnItems } from './core';
+import { directions, newBoardTemplate } from './core';
 
 let board: number[][] = [
   [0, 0, 0, 0, 0, 0, 0, 0],
@@ -27,9 +14,10 @@ let board: number[][] = [
   [0, 0, 0, 0, 0, 0, 0, 0],
 ];
 
-let canTurnAble = 1;
-const win = { black: -1, white: -1 };
-let isPassFront = false;
+let canTurnAble = 1; // どのオセロを返すターンなのか
+const win = { black: -1, white: -1 }; // 勝敗時にオセロの置いた個数を計算する用
+let isPassFront = false; // 前のターンでパスをしたか(trueならゲーム終了)
+let boardEnd = false; // 試合が終了している
 
 export const boardUseCase = {
   getBoard: (): ReturnItems => {
@@ -55,6 +43,16 @@ export const boardUseCase = {
     const msg: string = passCheck(canTurnAble);
 
     return { board, nowTurn: canTurnAble, youCanTurn, win, msg };
+  },
+  deleteBoard: () => {
+    if (boardEnd) {
+      board = JSON.parse(JSON.stringify(newBoardTemplate));
+      canTurnAble = 1;
+      win.black = -1;
+      win.white = -1;
+      isPassFront = false;
+      boardEnd = false;
+    }
   },
 };
 
@@ -107,6 +105,7 @@ const passCheck = (turnColor: number): string => {
 
       win.black = black;
       win.white = white;
+      boardEnd = true;
       return 'これ以上置く場所がないのでゲームを終了しました';
     }
 
@@ -114,34 +113,14 @@ const passCheck = (turnColor: number): string => {
     canTurnAble = 3 - turnColor;
     return 'パス';
   }
+  boardEnd = true;
   return 'これ以上置く場所がないのでゲームを終了しました';
 };
 
-/**
- * オセロをひっくりかえす \
- * 次におくことができる位置の表示やひっくり返す処理、パス判定に使う関数
- *
- * @param x オセロのx座標
- * @param y オセロのy座標
- * @param turnColor 返すオセロの色
- * @param vertification オセロがひっくり返せる時ひっくり返す処理を行うか(falseのときひっくり返す)
- * @returns その盤面はオセロをひっくり返すことができるか
- */
 const turnFunc = (x: number, y: number, turnColor: number, vertification: boolean) => {
   let isTurnAble = false;
 
   const newBoard: number[][] = JSON.parse(JSON.stringify(board));
-
-  const directions: number[][] = [
-    [1, 0],
-    [-1, 0],
-    [0, 1],
-    [0, -1],
-    [1, 1],
-    [-1, -1],
-    [1, -1],
-    [-1, 1],
-  ];
 
   let isSet = false;
 

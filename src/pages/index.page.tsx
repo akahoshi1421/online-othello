@@ -6,7 +6,7 @@ import { BasicHeader } from 'src/pages/@components/BasicHeader/BasicHeader';
 import { apiClient } from 'src/utils/apiClient';
 import { returnNull } from 'src/utils/returnNull';
 import { userAtom } from '../atoms/user';
-import styles from './index.module.css';
+import styles from './index.module.scss';
 
 const Home = () => {
   const [user] = useAtom(userAtom);
@@ -45,6 +45,10 @@ const Home = () => {
       setIsMyturn(res.youCanTurn);
       setMsg(res.msg);
     }
+  };
+
+  const deleteBoard = async () => {
+    await apiClient.board.$delete();
   };
 
   useEffect(() => {
@@ -99,6 +103,15 @@ const Home = () => {
             ))
           )}
         </div>
+
+        {win.black !== -1 && (
+          <div className={styles.reTitle}>
+            <div className={styles.reTitleText}>再戦しますか？</div>
+            <button className={styles.reBtn} onClick={() => deleteBoard()}>
+              再戦する
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

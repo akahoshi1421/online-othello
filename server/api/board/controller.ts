@@ -7,4 +7,8 @@ export default defineController(() => ({
     status: 200,
     body: boardUseCase.clickBoard(body.x, body.y, user.id),
   }),
+  delete: () => ({
+    status: 204,
+    body: boardUseCase.deleteBoard(),
+  }),
 }));

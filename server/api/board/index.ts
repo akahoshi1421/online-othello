@@ -1,4 +1,4 @@
-import type { ReturnItems } from '$/useCase/boardUseCase';
+import type { ReturnItems } from '$/useCase/core';
 
 export type Methods = {
   get: {
@@ -7,5 +7,8 @@ export type Methods = {
   post: {
     reqBody: { x: number; y: number };
     resBody: ReturnItems;
+  };
+  delete: {
+    status: 204;
   };
 };

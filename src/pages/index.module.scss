@@ -151,3 +151,39 @@
   display: block;
   margin-top: 30px;
 }
+
+.reTitle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;
+  height: 120px;
+  background-color: rgb(190, 187, 187);
+  transform: translate(-50%);
+  border-radius: 10px;
+
+  text-align: center;
+
+  .reTitleText {
+    font-size: 200%;
+  }
+
+  .reBtn {
+    margin-top: 10px;
+    width: 50%;
+    height: 40px;
+
+    border: 0px;
+    border-radius: 10px;
+
+    font-size: large;
+    background-color: #f0eeee;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #868484;
+      color: white;
+    }
+  }
+}
